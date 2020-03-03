@@ -22,25 +22,17 @@ class ArticlesPipeline(object):
             db=settings['MYSQL_DBNAME'],
             user=settings['MYSQL_USER'],
             passwd=settings['MYSQL_PASSWD'],
-            charset='utf8',  # 编码要加上，否则可能出现中文乱码问题
-            cursorclass=MySQLdb.cursors.DictCursor,
-            use_unicode=False,
         )
-        dbpool = adbapi.ConnectionPool('MySQLdb', **dbparams)  # **表示将字典扩展为关键字参数,相当于host=xxx,db=yyy....
-        return cls(dbpool)  # 相当于dbpool付给了这个类，self中可以得到
+        db = pymysql.connect(dbparams["host"],dbparams["user"],dbparams["passwd"],dbparams["db"] )
+        return cls(db)  # 相当于dbpool付给了这个类，self中可以得到
 
     # pipeline默认调用
     def process_item(self, item, spider):
-        query = self.dbpool.runInteraction(self._conditional_insert, item)  # 调用插入的方法
-        query.addErrback(self._handle_error, item, spider)  # 调用异常处理方法
-        return item
+        cursor= self.dbpool.cursor()
+        cursor.execute('insert into articles(keywordContains,title,journalName,abstract,keywords,referenceList,cityByNumber,cityBy,authors,date) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(item['keywordContains'], item['title'], item['journalName'],' '.join(item['abstract']),' '.join(item['keywords']),item['referenceList'],item['cityByNumber'],item['cityBy'],' '.join(item['authors']),item['date']))
 
-    # 写入数据库中
-    # SQL语句在这里
-    def _conditional_insert(self, tx, item):
-        sql = "insert into jsbooks(author,title,url,pubday,comments,likes,rewards,views) values(%s,%s,%s,%s,%s,%s,%s,%s)"
-        params = (item['author'], item['title'], item['url'], item['pubday'],item['comments'],item['likes'],item['rewards'],item['reads'])
-        tx.execute(sql, params)
+        self.dbpool.commit()
+        return item  # 必须实现返回
 
     # 错误处理方法
     def _handle_error(self, failue, item, spider):

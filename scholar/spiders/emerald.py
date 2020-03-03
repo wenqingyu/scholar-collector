@@ -51,5 +51,8 @@ class EmeraldSpider(scrapy.Spider):
             for label in authorLabel:
                 author = label.xpath('.//span/text()').extract()
                 item['authors'].append(' '.join(author))
+            
+            item['cityByNumber']='123'
+            item['cityBy']='123'
             yield item
             pass   

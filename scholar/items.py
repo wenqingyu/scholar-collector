@@ -11,7 +11,6 @@ import scrapy
 class ArticalItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    number = scrapy.Field()
     keywordContains = scrapy.Field()
     title = scrapy.Field()
     journalName = scrapy.Field()
