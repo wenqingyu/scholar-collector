@@ -93,10 +93,18 @@ ITEM_PIPELINES = {
     'scholar.pipelines.ArticlesPipeline': 300,#保存到mysql数据库
 }
 
+DOWNLOADER_MIDDLEWARES = {
+    'scholar.middlewares.GetFailedUrl': 220,
+}
+
+RETRY_ENABLED = True                  # 默认开启失败重试，一般关闭
+RETRY_TIMES = 3                         # 失败后重试次数，默认两次
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408]    # 碰到这些验证码，才开启重试
+
+
 #Mysql数据库的配置信息
 MYSQL_HOST = '120.79.214.170'
-MYSQL_DBNAME = 'articles'         #数据库名字，请修改
-MYSQL_USER = 'article'             #数据库账号，请修改
-MYSQL_PASSWD = '123456'         #数据库密码，请修改
-
-MYSQL_PORT = 3306               #数据库端口，在dbhelper中使用
+MYSQL_DBNAME = 'articles'         #数据库名字
+MYSQL_USER = 'article'             #数据库账号
+MYSQL_PASSWD = '123456'         #数据库密码
+MYSQL_PORT = 3306               #数据库端口

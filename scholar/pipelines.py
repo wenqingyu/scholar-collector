@@ -29,7 +29,7 @@ class ArticlesPipeline(object):
     # pipeline默认调用
     def process_item(self, item, spider):
         cursor= self.dbpool.cursor()
-        cursor.execute('insert into articles(keywordContains,title,journalName,abstract,keywords,referenceList,cityByNumber,cityBy,authors,date) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(item['keywordContains'], item['title'], item['journalName'],' '.join(item['abstract']),' '.join(item['keywords']),item['referenceList'],item['cityByNumber'],item['cityBy'],' '.join(item['authors']),item['date']))
+        cursor.execute('insert into articles(keywordContains,title,journalName,abstract,keywords,referenceList,citeByNumber,citeBy,authors,date) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(item['keywordContains'], item['title'], item['journalName'],' '.join(item['abstract']),' '.join(item['keywords']),item['referenceList'],item['citeByNumber'],item['citeBy'],' '.join(item['authors']),item['date']))
 
         self.dbpool.commit()
         return item  # 必须实现返回

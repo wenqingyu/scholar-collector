@@ -17,8 +17,8 @@ class ArticalItem(scrapy.Item):
     abstract  = scrapy.Field()
     keywords = scrapy.Field()
     referenceList = scrapy.Field()
-    cityByNumber = scrapy.Field()
-    cityBy = scrapy.Field()
+    citeByNumber = scrapy.Field()
+    citeBy = scrapy.Field()
     authors = scrapy.Field()
     date = scrapy.Field()
     pass

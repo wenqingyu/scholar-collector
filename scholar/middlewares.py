@@ -6,6 +6,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
 
 
 class ScholarSpiderMiddleware(object):
@@ -101,3 +102,24 @@ class ScholarDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class GetFailedUrl(RetryMiddleware):
+    def __init__(self, settings):
+        self.max_retry_times = settings.getint('RETRY_TIMES')
+        self.retry_http_codes = set(int(x) for x in settings.getlist('RETRY_HTTP_CODES'))
+        self.priority_adjust = settings.getint('RETRY_PRIORITY_ADJUST')
+
+    def process_response(self, request, response, spider):
+        if response.status in self.retry_http_codes:
+        # 将爬取失败的URL存下来，你也可以存到别的存储
+            with open(str(spider.name) + ".txt", "a") as f:
+                f.write(response.url + "\n")
+            return response
+        return response
+
+    def process_exception(self, request, exception, spider):
+    # 出现异常的处理
+        if isinstance(exception, self.EXCEPTIONS_TO_RETRY):
+            with open(str(spider.name) + ".txt", "a") as f:
+                f.write(str(request) + "\n")
+            return None

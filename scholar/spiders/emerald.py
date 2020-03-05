@@ -3,6 +3,8 @@ import scrapy
 from scrapy import Request
 from scholar.items import ArticalItem
 from urllib import  parse
+from urllib.parse import parse_qs
+import re
 
 class EmeraldSpider(scrapy.Spider):
     name = 'emerald'
@@ -16,43 +18,51 @@ class EmeraldSpider(scrapy.Spider):
 
     def parse(self, response):
         item = ArticalItem()
-        articles = response.xpath('//section[@id="search_results__list"]//div[@class="intent_search_result container card-shadow is-animated Search-item__wrapper"]')
-        urlResult = parse.urlparse(response.url)
-        if urlResult.path == '/insight/search':
-            #添加文章详情链接
-            for article in articles:
-                contentUrl = article.xpath(
-                './div//a[@class="intent_link"]/@href').extract()[0]
-                if contentUrl:
-                    contentUrl = 'https://www.emerald.com' + contentUrl
-                yield Request(contentUrl)
-            #添加下一页链接
-            nextUrl = response.xpath('//a[@class="intent_next_page_link page-link pl-2"]/@href').extract()
-            if nextUrl:
-                nextUrl = 'http://www.emerald.com/insight/' + nextUrl[0]
-                yield Request(nextUrl)
-        else:
-            #获取具体文章内容
-            item['title'] = response.xpath(
-                '//*[@id="mainContent"]//h1[@class="intent_article_title mt-0 mb-3"]/text()').extract()[0]
-            item['keywordContains'] = ''
-            item['journalName'] = urlResult.hostname
-            item['abstract'] = response.xpath(
-                '//*[@id="abstract"]//p/text()').extract()
-            item['date'] = response.xpath(
-                '//*[@id="mainContent"]/div[1]/div/div/header/div/div[1]/p[3]/span[1]/text()').extract()[0]
-            item['referenceList'] = response.xpath(
-                '//section[@class="Citation mb-2"]/p').extract()[0]
-            item['keywords'] = response.xpath(
-                '//*[@id="keywords_list"]/ul/li//span[@class="intent_text"]/text()').extract()
-            authorLabel = response.xpath(
-                '//*[@id="intent_contributors"]//a[@class="contrib-search"]')
-            item['authors']=[ ]
-            for label in authorLabel:
-                author = label.xpath('.//span/text()').extract()
-                item['authors'].append(' '.join(author))
-            
-            item['cityByNumber']='123'
-            item['cityBy']='123'
-            yield item
-            pass   
+        try:
+            articles = response.xpath('//section[@id="search_results__list"]//div[@class="intent_search_result container card-shadow is-animated Search-item__wrapper"]')
+            urlResult = parse.urlparse(response.url)
+            queryResult = parse_qs(urlResult.query)
+            if urlResult.path == '/insight/search':
+                #添加文章详情链接
+                for article in articles:
+                    contentUrl = article.xpath(
+                    './div//a[@class="intent_link"]/@href').extract()[0]
+                    if contentUrl:
+                        contentUrl = 'https://www.emerald.com' + contentUrl
+                    yield Request(contentUrl + '?' + 'q=' + queryResult['q'][0])
+                #添加下一页链接
+                nextUrl = response.xpath('//a[@class="intent_next_page_link page-link pl-2"]/@href').extract()
+                if nextUrl:
+                    nextUrl = 'http://www.emerald.com/insight/' + nextUrl[0]
+                    yield Request(nextUrl)
+            else:
+                #获取具体文章内容
+                titleRegex = response.xpath('.').re("intent_article_title[^>]+>([^<]+)")
+                item['title'] = titleRegex[0] if titleRegex else ''
+                item['keywordContains'] = queryResult['q'][0]
+                item['journalName'] = urlResult.hostname
+                abstractResult = response.xpath(
+                    '//*[@id="abstract"]//p/text()').extract()
+                item['abstract'] = abstractResult if abstractResult else ''
+                dateRegex = response.xpath('.').re("\d+\s*[a-zA-Z]+\s*2020")
+                item['date'] = dateRegex[1] if dateRegex else ''
+                referenceResult = response.xpath(
+                    '//section[@class="Citation mb-2"]/p').extract()
+                item['referenceList'] = referenceResult[0] if referenceResult else ''
+
+                keywordsResult = response.xpath(
+                    '//*[@id="keywords_list"]/ul/li//span[@class="intent_text"]/text()').extract()
+                item['keywords'] = keywordsResult if referenceResult else ''
+                authorLabel = response.xpath(
+                    '//*[@id="intent_contributors"]//a[@class="contrib-search"]')
+                item['authors']=[ ]
+                for label in authorLabel:
+                    author = label.xpath('.//span/text()').extract()
+                    item['authors'].append(' '.join(author))
+                
+                item['citeByNumber']=''
+                item['citeBy']=''
+                yield item
+                pass   
+        except:
+            print('')
