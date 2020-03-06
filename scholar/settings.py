@@ -97,6 +97,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scholar.middlewares.GetFailedUrl': 220,
 }
 COMMANDS_MODULE = 'scholar.commands'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
 
 RETRY_ENABLED = True                  # 默认开启失败重试，一般关闭
 RETRY_TIMES = 3                         # 失败后重试次数，默认两次

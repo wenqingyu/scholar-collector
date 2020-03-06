@@ -52,7 +52,7 @@ class EmeraldSpider(scrapy.Spider):
 
                 keywordsResult = response.xpath(
                     '//*[@id="keywords_list"]/ul/li//span[@class="intent_text"]/text()').extract()
-                item['keywords'] = keywordsResult if referenceResult else ''
+                item['keywords'] = keywordsResult if keywordsResult else ''
                 authorLabel = response.xpath(
                     '//*[@id="intent_contributors"]//a[@class="contrib-search"]')
                 item['authors']=[ ]
