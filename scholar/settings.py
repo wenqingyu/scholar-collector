@@ -96,6 +96,7 @@ ITEM_PIPELINES = {
 DOWNLOADER_MIDDLEWARES = {
     'scholar.middlewares.GetFailedUrl': 220,
 }
+COMMANDS_MODULE = 'scholar.commands'
 
 RETRY_ENABLED = True                  # 默认开启失败重试，一般关闭
 RETRY_TIMES = 3                         # 失败后重试次数，默认两次
