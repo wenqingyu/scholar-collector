@@ -10,7 +10,7 @@ from scrapy.downloadermiddlewares.retry import RetryMiddleware
 import random
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scholar.settings import USER_AGENT_LIST
-from scholar.my_proxies import PROXY
+from scholar.aliproxy import GetProxy
 
 class ScholarSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -58,7 +58,6 @@ class ScholarSpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
-
 
 class ScholarDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -135,10 +134,11 @@ class RotateUserAgentMiddleware(UserAgentMiddleware):
         user_agent = random.choice(USER_AGENT_LIST)
         if user_agent:
             request.headers.setdefault('User-Agent', user_agent)
+            request.headers.setdefault('Access-Control-Allow-Credentials', 'false' )
             print(f"User-Agent:{user_agent}")
-
 
 class MyProxyMidleware(object):
     def process_request(self, request, spider):
-        proxy = random.choice(PROXY)
-        request.meta['proxy']  = proxy['ip'] + ':' + proxy['port']
+        proxy = GetProxy()
+        request.headers.setdefault('Proxy-Authorization', proxy['Proxy-Authorization'])
+        request.meta["proxy"] = proxy['proxy']

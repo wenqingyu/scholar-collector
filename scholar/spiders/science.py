@@ -10,10 +10,10 @@ class ScienceSpider(scrapy.Spider):
     name = 'science'
     start_urls = [
         'https://www.sciencedirect.com/search/advanced?qs=Hospitality&date=2020-2021&sortBy=date',
-        'https://www.sciencedirect.com/search/advanced?qs=tourism&date=2020-2021&sortBy=date',
-        'https://www.sciencedirect.com/search/advanced?qs=travel&date=2020-2021&sortBy=date',
-        'https://www.sciencedirect.com/search/advanced?qs=tourist&date=2020-2021&sortBy=date',
-        'https://www.sciencedirect.com/search/advanced?qs=hotel&date=2020-2021&sortBy=date'
+        # 'https://www.sciencedirect.com/search/advanced?qs=tourism&date=2020-2021&sortBy=date',
+        # 'https://www.sciencedirect.com/search/advanced?qs=travel&date=2020-2021&sortBy=date',
+        # 'https://www.sciencedirect.com/search/advanced?qs=tourist&date=2020-2021&sortBy=date',
+        # 'https://www.sciencedirect.com/search/advanced?qs=hotel&date=2020-2021&sortBy=date'
         ]
 
     def parse(self, response):
