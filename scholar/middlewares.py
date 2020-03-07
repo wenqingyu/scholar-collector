@@ -7,7 +7,10 @@
 
 from scrapy import signals
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
-
+import random
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+from scholar.settings import USER_AGENT_LIST
+from scholar.my_proxies import PROXY
 
 class ScholarSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -118,8 +121,24 @@ class GetFailedUrl(RetryMiddleware):
         return response
 
     def process_exception(self, request, exception, spider):
-    # 出现异常的处理
+        # 出现异常的处理
         if isinstance(exception, self.EXCEPTIONS_TO_RETRY):
             with open(str(spider.name) + ".txt", "a") as f:
                 f.write(str(request) + "\n")
             return None
+
+class RotateUserAgentMiddleware(UserAgentMiddleware):
+    '''
+    用户代理中间件（处于下载中间件位置）
+    '''
+    def process_request(self, request, spider):
+        user_agent = random.choice(USER_AGENT_LIST)
+        if user_agent:
+            request.headers.setdefault('User-Agent', user_agent)
+            print(f"User-Agent:{user_agent}")
+
+
+class MyProxyMidleware(object):
+    def process_request(self, request, spider):
+        proxy = random.choice(PROXY)
+        request.meta['proxy']  = proxy['ip'] + ':' + proxy['port']
