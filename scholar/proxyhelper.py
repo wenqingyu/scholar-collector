@@ -3,7 +3,6 @@ import re,os
 import telnetlib
 import json
 
-
 def GetProxyAddress():
     try:
         f = open("my_proxies.json", encoding='utf-8') 
