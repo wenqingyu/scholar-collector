@@ -8,9 +8,12 @@
 from scrapy import signals
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 import random
+import json
+from scrapy import Request
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scholar.settings import USER_AGENT_LIST
 from scholar.aliproxy import GetProxy
+from scholar.proxyhelper import GetProxyAddress
 
 class ScholarSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -120,11 +123,17 @@ class GetFailedUrl(RetryMiddleware):
         return response
 
     def process_exception(self, request, exception, spider):
-        # 出现异常的处理
-        if isinstance(exception, self.EXCEPTIONS_TO_RETRY):
-            with open(str(spider.name) + ".txt", "a") as f:
-                f.write(str(request) + "\n")
-            return None
+        self.proxy_ip = False
+        ## 针对超时和无响应的reponse,获取新的IP,设置到request中，然后重新发起请求
+        if '61' in str(exception) or '60' in str(exception):
+            self.proxy_ip = GetProxyAddress()
+            
+        if self.proxy_ip:
+            current_proxy = f'http://{self.proxy_ip}'
+            request.meta['proxy'] = current_proxy
+        
+        if isinstance(exception, self.EXCEPTIONS_TO_RETRY) and not request.meta.get('dont_retry', False):
+            return self._retry(request, exception, spider)
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
     '''
@@ -142,3 +151,10 @@ class MyProxyMidleware(object):
         proxy = GetProxy()
         request.headers.setdefault('Proxy-Authorization', proxy['Proxy-Authorization'])
         request.meta["proxy"] = proxy['proxy']
+
+class addressProxyMiddleware(object):
+    def process_request(self, request, spider):
+        # proxy = random.choice(my_proxies.PROXY)
+        f = open("my_proxies.json", encoding='utf-8') 
+        proxy = json.load(f)
+        request.meta['proxy']  = proxy["ip"]+ ':' + proxy["port"]
