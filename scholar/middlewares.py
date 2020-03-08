@@ -157,4 +157,4 @@ class addressProxyMiddleware(object):
         # proxy = random.choice(my_proxies.PROXY)
         f = open("my_proxies.json", encoding='utf-8') 
         proxy = json.load(f)
-        request.meta['proxy']  = proxy["ip"]+ ':' + proxy["port"]
+        request.meta['proxy']  = "http://" + proxy["ip"]+ ':' + proxy["port"]

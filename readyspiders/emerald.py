@@ -9,11 +9,11 @@ import re
 class EmeraldSpider(scrapy.Spider):
     name = 'emerald'
     start_urls = [
-        'http://www.emerald.com/insight/search?q=Hospitality&fromYear=2020',
-        'http://www.emerald.com/insight/search?q=tourism&fromYear=2020',
-        'http://www.emerald.com/insight/search?q=travel&fromYear=2020',
-        'http://www.emerald.com/insight/search?q=tourist&fromYear=2020',
-        'http://www.emerald.com/insight/search?q=hotel&fromYear=2020'
+        'https://www.emerald.com/insight/search?q=Hospitality&fromYear=2020',
+        'https://www.emerald.com/insight/search?q=tourism&fromYear=2020',
+        'https://www.emerald.com/insight/search?q=travel&fromYear=2020',
+        'https://www.emerald.com/insight/search?q=tourist&fromYear=2020',
+        'https://www.emerald.com/insight/search?q=hotel&fromYear=2020'
         ]
 
     def parse(self, response):
