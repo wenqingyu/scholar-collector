@@ -6,15 +6,34 @@ from urllib import  parse
 from urllib.parse import parse_qs
 import re
 
+start_urls = [
+]
+
+qs_list = [
+    'leader',
+    'leadership',
+    'supervisior',
+    'followership',
+    'follower'
+]
+
+pub_list = [
+    'Hospitality',
+    'tourism',
+    'travel',
+    'tourist',
+    'hotel'
+]
+
+for qs in qs_list:
+    for pub in pub_list:
+        start_urls.append('https://www.sciencedirect.com/search/advanced?qs={0}&pub={1}&date=2000-2020&sortBy=date'.format(qs,pub))
+
+
+
 class ScienceSpider(scrapy.Spider):
     name = 'science'
-    start_urls = [
-        'http://www.sciencedirect.com/search/advanced?qs=Hospitality&date=2020-2021&sortBy=date',
-        'http://www.sciencedirect.com/search/advanced?qs=tourism&date=2020-2021&sortBy=date',
-        'http://www.sciencedirect.com/search/advanced?qs=travel&date=2020-2021&sortBy=date',
-        'http://www.sciencedirect.com/search/advanced?qs=tourist&date=2020-2021&sortBy=date',
-        'http://www.sciencedirect.com/search/advanced?qs=hotel&date=2020-2021&sortBy=date'
-        ]
+    start_urls = start_urls
 
     def parse(self, response):
         item = ArticalItem()
@@ -29,7 +48,7 @@ class ScienceSpider(scrapy.Spider):
                     '@href').extract()[0]
                     if contentUrl:
                         contentUrl = 'https://www.sciencedirect.com' + contentUrl
-                    yield Request(contentUrl + '?' + 'qs=' + queryResult['qs'][0])
+                    yield Request(contentUrl + '?' + 'qs=' + queryResult['qs'][0] + '&' + 'pub=' + queryResult['pub'][0])
                 #添加下一页链接
                 nextUrl = response.xpath('//a[@data-aa-name="srp-next-page"]/@href').extract()
                 if nextUrl:
@@ -40,7 +59,7 @@ class ScienceSpider(scrapy.Spider):
                 titleRegex = response.xpath('.').re('title-text">([^<]+)')
                 item['title'] = titleRegex[0] if titleRegex else ''
                 item['keywordContains'] = queryResult['qs'][0]
-                item['journalName'] = urlResult.hostname
+                item['journalName'] = queryResult['pub'][0]
                 abstractResult = response.xpath(
                     '//div[@class="abstract author"]//div').extract()
                 item['abstract'] = abstractResult if abstractResult else ''

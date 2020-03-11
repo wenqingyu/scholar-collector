@@ -12,7 +12,7 @@ import json
 from scrapy import Request
 from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
 from scholar.settings import USER_AGENT_LIST
-from scholar.aliproxy import GetProxy
+from scholar.proxies import GetProxy
 from scholar.proxyhelper import GetProxyAddress
 
 class ScholarSpiderMiddleware(object):
@@ -155,6 +155,7 @@ class MyProxyMidleware(object):
 class addressProxyMiddleware(object):
     def process_request(self, request, spider):
         # proxy = random.choice(my_proxies.PROXY)
-        f = open("my_proxies.json", encoding='utf-8') 
-        proxy = json.load(f)
-        request.meta['proxy']  = "http://" + proxy["ip"]+ ':' + proxy["port"]
+        # f = open("my_proxies.json", encoding='utf-8') 
+        # proxy = json.load(f)
+        # request.meta['proxy']  = "http://" + proxy["ip"]+ ':' + proxy["port"]
+        request.meta['proxy'] = GetProxy()['proxy']['https']

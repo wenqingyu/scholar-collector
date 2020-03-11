@@ -23,13 +23,13 @@ class ArticlesPipeline(object):
             user=settings['MYSQL_USER'],
             passwd=settings['MYSQL_PASSWD'],
         )
-        db = pymysql.connect(dbparams["host"],dbparams["user"],dbparams["passwd"],dbparams["db"] )
+        db = pymysql.connect(dbparams["host"],dbparams["user"],dbparams["passwd"],dbparams["db"],use_unicode=True, charset="utf8" )
         return cls(db)  # 相当于dbpool付给了这个类，self中可以得到
 
     # pipeline默认调用
     def process_item(self, item, spider):
         cursor= self.dbpool.cursor()
-        cursor.execute('insert into articles(keywordContains,title,journalName,abstract,keywords,referenceList,citeByNumber,citeBy,authors,date) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(item['keywordContains'], item['title'], item['journalName'],' '.join(item['abstract'])[1:250],' '.join(item['keywords']),item['referenceList'],item['citeByNumber'],item['citeBy'],' '.join(item['authors']),item['date']))
+        cursor.execute('insert into articles(keywordContains,title,journalName,abstract,keywords,referenceList,citeByNumber,citeBy,authors,date) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(item['keywordContains'][0:250], item['title'][0:250], item['journalName'][0:250],' '.join(item['abstract'])[0:250],' '.join(item['keywords'])[0:250],item['referenceList'][0:250],item['citeByNumber'][0:250],item['citeBy'][0:250],' '.join(item['authors'])[0:250],item['date']))
 
         self.dbpool.commit()
         return item  # 必须实现返回

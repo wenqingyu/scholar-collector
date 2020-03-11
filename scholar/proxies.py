@@ -35,9 +35,12 @@ def GetProxy():
     auth = "sign=" + sign + "&" + "orderno=" + orderno + "&" + "timestamp=" + timestamp + "&change=true"
 
     #http协议的网站用此配置
-    proxy = {"http":"http://" + ip_port}
+    # proxy = {}
     #https协议的网站用此配置
-    #proxy = {"https": "https://" + ip_port}
+    proxy = {
+        "https": "https://" + ip_port,
+        "http":"http://" + ip_port
+    }
     result = {
         "Proxy-Authorization":auth,
         "proxy":proxy
