@@ -97,7 +97,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scholar.middlewares.GetFailedUrl': 220,
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware' : None,
     'scholar.middlewares.RotateUserAgentMiddleware' :400,
-    # 'scholar.middlewares.addressProxyMiddleware' :300,
+    'scholar.middlewares.addressProxyMiddleware' :300,
     # 'scholar.middlewares.MyProxyMidleware':300,
 }
 

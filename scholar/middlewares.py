@@ -154,8 +154,8 @@ class MyProxyMidleware(object):
 
 class addressProxyMiddleware(object):
     def process_request(self, request, spider):
-        # proxy = random.choice(my_proxies.PROXY)
         # f = open("my_proxies.json", encoding='utf-8') 
         # proxy = json.load(f)
-        # request.meta['proxy']  = "http://" + proxy["ip"]+ ':' + proxy["port"]
-        request.meta['proxy'] = GetProxy()['proxy']['https']
+        proxy = GetProxyAddress()
+        request.meta['proxy']  = "http://" + proxy
+        # request.meta['proxy'] = GetProxy()['proxy']['https']
