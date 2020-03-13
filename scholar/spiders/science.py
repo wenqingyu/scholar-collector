@@ -5,6 +5,8 @@ from scholar.items import ArticalItem
 from urllib import  parse
 from urllib.parse import parse_qs
 import re
+import json
+import requests
 
 start_urls = [
 ]
@@ -54,21 +56,26 @@ class ScienceSpider(scrapy.Spider):
                 if nextUrl:
                     nextUrl = 'https://www.sciencedirect.com' + nextUrl[0]
                     yield Request(nextUrl)
-            else:
+            elif '/science/article' in urlResult.path:
                 #获取具体文章内容
+                articleid = re.search(r'pii/([^?]+)', response.url).group(1)
                 titleRegex = response.xpath('.').re('title-text">([^<]+)')
                 item['title'] = titleRegex[0] if titleRegex else ''
                 item['keywordContains'] = queryResult['qs'][0]
-                item['journalName'] = queryResult['pub'][0]
+                journalNameResult = response.xpath(
+                    '//*[@id="publication-title"]/a/@title').extract()
+                item['journalName'] = journalNameResult[0] if journalNameResult else ''
                 abstractResult = response.xpath(
                     '//div[@class="abstract author"]//div').extract()
                 item['abstract'] = abstractResult if abstractResult else ''
                 dateRegex = response.xpath('.').re('Publication date":"([^"]+)')
                 item['date'] = dateRegex[0] if dateRegex else ''
                 referenceResult = response.xpath(
-                    '//*[@id="cebib0010"]').extract()
+                    '//*[@class="reference"]').extract()
                 item['referenceList'] = referenceResult[0] if referenceResult else ''
-
+                # entitledToken = response.xpath('.').re('entitledToken":"([^"]+)')[0]
+                # referenceUrl ='https://www.sciencedirect.com/sdfe/arp/pii/'+articleid+'/references?entitledToken='+entitledToken
+                # yield Request(referenceUrl)
                 keywordsResult = response.xpath(
                     '//*[@class="keyword"]//span/text()').extract()
                 item['keywords'] = keywordsResult if keywordsResult else ''
@@ -78,10 +85,20 @@ class ScienceSpider(scrapy.Spider):
                 for label in authorLabel:
                     author = label.xpath('.//span/text()').extract()
                     item['authors'].append(' '.join(author))
-                
-                item['citeByNumber']=''
+                citeurl = 'https://www.sciencedirect.com/sdfe/arp/pii/'+articleid+'/citingArticles?creditCardPurchaseAllowed=true&preventTransactionalAccess=false&preventDocumentDelivery=true'
+                yield Request(citeurl)
+                item['articleId'] = articleid
+                item['citeByNumber'] = 0
                 item['citeBy']=''
                 yield item
                 pass   
+            else:
+                articleid = re.search(r'pii/([^/]+)', response.url).group(1)
+                citenumber = json.loads(response.text)
+                item['articleId'] = articleid
+                item['citeByNumber']= citenumber['hitCount'] if citenumber else 0
+                item['citeBy']= citenumber['articles'] if citenumber else 0
+                yield item
+                pass 
         except:
             print('')

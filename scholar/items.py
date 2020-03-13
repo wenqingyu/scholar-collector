@@ -21,4 +21,5 @@ class ArticalItem(scrapy.Item):
     citeBy = scrapy.Field()
     authors = scrapy.Field()
     date = scrapy.Field()
+    articleId = scrapy.Field()
     pass

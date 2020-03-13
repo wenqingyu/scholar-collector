@@ -29,9 +29,14 @@ class ArticlesPipeline(object):
     # pipeline默认调用
     def process_item(self, item, spider):
         cursor= self.dbpool.cursor()
-        cursor.execute('insert into articles(keywordContains,title,journalName,abstract,keywords,referenceList,citeByNumber,citeBy,authors,date) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(item['keywordContains'][0:250], item['title'][0:250], item['journalName'][0:250],' '.join(item['abstract'])[0:250],' '.join(item['keywords'])[0:250],item['referenceList'][0:250],item['citeByNumber'][0:250],item['citeBy'][0:250],' '.join(item['authors'])[0:250],item['date']))
 
-        self.dbpool.commit()
+        if item["citeBy"]:
+            citeByStr = ''.join(str(v) for v in item["citeBy"])
+            cursor.execute('INSERT INTO articles (articles.articleId, articles.citeBy, articles.citeByNumber) VALUES (%s, %s,%s) ON  DUPLICATE KEY UPDATE  citeBy=%s, citeByNumber=%s;',(item["articleId"],citeByStr,item["citeByNumber"],citeByStr,item["citeByNumber"]))
+            self.dbpool.commit()
+        else:
+            cursor.execute('INSERT INTO articles (articles.articleId, keywordContains,title,journalName,abstract,keywords,referenceList,citeByNumber,citeBy,authors,articles.date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON  DUPLICATE KEY UPDATE   keywordContains = %s,title =%s,journalName =%s,abstract=%s,keywords=%s,referenceList=%s,citeByNumber=%s,citeBy=%s,authors=%s,articles.date=%s;',(item["articleId"],item["keywordContains"],item["title"],item["journalName"],' '.join(item["abstract"]),' '.join(item["keywords"]),item["referenceList"],item["citeByNumber"],item["citeBy"],' '.join(item["authors"]),item["date"],item["keywordContains"],item["title"],item["journalName"],' '.join(item["abstract"]),' '.join(item["keywords"]),item["referenceList"],item["citeByNumber"],item["citeBy"],''.join(item["authors"]),item["date"]))
+            self.dbpool.commit()
         return item  # 必须实现返回
 
     # 错误处理方法
